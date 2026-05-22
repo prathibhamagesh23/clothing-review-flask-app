@@ -1,0 +1,29 @@
+from gensim.models import FastText
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+import pickle
+
+# Load saved models and vectorizer
+ft_model = FastText.load('fasttext_model.bin')
+with open('logistic_regression_model.pkl', 'rb') as f:
+    lr_model = pickle.load(f)
+with open('tfidf_vectorizer.pkl', 'rb') as f:
+    tfidf_vectorizer = pickle.load(f)
+
+# Function to vectorize a single review
+def vectorize_text(text, model, vectorizer):
+    words = text.split()
+    tfidf_weights = vectorizer.transform([text]).toarray()[0]
+    feature_names = vectorizer.get_feature_names_out()
+    weighted_vectors = []
+    for word in words:
+        if word in feature_names:
+            try:
+                weighted_vectors.append(model.wv[word] * tfidf_weights[feature_names.tolist().index(word)])
+            except KeyError:
+                pass
+    if len(weighted_vectors) > 0:
+        return sum(weighted_vectors) / len(weighted_vectors)
+    else:
+        return np.zeros(model.vector_size)
+
