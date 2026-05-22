@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Review Summary</h2>
+<p><strong>Item:</strong> {{ item['Clothes Title'] }}</p>
+<p><strong>Review Title:</strong> {{ title }}</p>
+<p><strong>Review Text:</strong> {{ review }}</p>
+<p><strong>Rating:</strong> {{ rating }}</p>
+<p><strong>System Recommendation:</strong>
+  {% if predicted == 1 %}
+    <span style="background-color: #d4edda; color: #155724; padding: 5px 10px; border-radius: 5px;">
+      Recommended 
+    </span>
+  {% else %}
+    <span style="background-color: #f8d7da; color: #721c24; padding: 5px 10px; border-radius: 5px;">
+      Not Recommended 
+    </span>
+  {% endif %}
+</p>
+
+<hr>
+<form method="post" action="{{ url_for('submit_final_review', item_id=item['Clothing ID']) }}">
+    <input type="hidden" name="title" value="{{ title }}">
+    <input type="hidden" name="review" value="{{ review }}">
+    <input type="hidden" name="rating" value="{{ rating }}">
+    <input type="hidden" name="predicted" value="{{ predicted }}">
+
+    <label for="override">Do you want to override the recommendation?</label><br>
+    <select name="override">
+        <option value="predicted">Keep System Prediction</option>
+        <option value="1">Yes</option>
+        <option value="0">No</option>
+    </select><br><br>
+
+    <button type="submit">Confirm and Submit</button>
+</form>
+
+<p><a href="{{ url_for('new_review', item_id=item['Clothing ID']) }}">← Cancel and Go Back</a></p>
+{% endblock %}

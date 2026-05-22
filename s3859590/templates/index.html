@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Browse Clothing Items</h2>
+
+
+<!-- FILTER + SEARCH FORM -->
+<form method="GET" action="{{ url_for('index') }}" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+  
+  <!-- Category Dropdown -->
+  <label for="category">Filter by Category:</label>
+  <select name="category" id="category" onchange="this.form.submit()">
+    {% for cat in categories %}
+      <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Search Box + Suggestions -->
+  <div style="position: relative;">
+    <input id="searchInput" type="text" name="search"
+           placeholder="Search for clothes..." autocomplete="off"
+           style="width: 300px; padding: 8px;"
+           value="{{ request.args.get('search', '') }}">
+
+    <div id="suggestions"
+         style="border: 1px solid #ccc; background: white; position: absolute; top: 38px; left: 0; width: 100%; display: none; z-index: 10;">
+    </div>
+  </div>
+
+  <!-- Search Button -->
+  <button type="submit" style="padding: 8px 12px;">Search</button>
+</form>
+
+
+<!-- LIVE JAVASCRIPT COUNT -->
+<p id="resultCount" style="font-style: italic; color: #666;"></p>
+
+{% if request.args.get('search') %}
+  <p><em>{{ items|length }} result{{ 's' if items|length != 1 else '' }} found</em></p>
+{% endif %}
+
+
+{% if items %}
+    <ul>
+    {% for item in items %}
+        <li>
+            <h3><a href="{{ url_for('item_detail', item_id=item['Clothing ID']) }}">{{ item['Clothes Title'] }}</a></h3>
+            <p>{{ item['Clothes Description'] }}</p>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No items found.</p>
+{% endif %}
+
+<script>
+  const titles = {{ titles|tojson }};
+  const input = document.getElementById('searchInput');
+  const suggestions = document.getElementById('suggestions');
+
+  input.addEventListener('input', function () {
+    const query = input.value.toLowerCase().trim();
+    suggestions.innerHTML = '';
+
+    if (query.length < 2) {
+      suggestions.style.display = 'none';
+      return;
+    }
+
+    const matches = titles.filter(t =>
+      t.toLowerCase().includes(query)
+    );
+
+    matches.slice(0, 5).forEach(match => {
+      const div = document.createElement('div');
+      div.textContent = match;
+      div.style.padding = '5px';
+      div.style.cursor = 'pointer';
+      div.onmouseover = () => div.style.background = '#f0f0f0';
+      div.onmouseout = () => div.style.background = '';
+      div.onclick = () => {
+        input.value = match;
+        suggestions.style.display = 'none';
+      };
+      suggestions.appendChild(div);
+    });
+
+    suggestions.style.display = matches.length ? 'block' : 'none';
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!suggestions.contains(e.target) && e.target !== input) {
+      suggestions.style.display = 'none';
+    }
+  });
+</script>
+
+
+
+
+{% endblock %}

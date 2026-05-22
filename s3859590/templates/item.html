@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div id="toast" class="toast">
+      {% for message in messages %}
+        ✅{{ message }}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<style>
+  .badge-yes {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+
+  .badge-no {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+</style>
+
+<h2>{{ item['Clothes Title'] }}</h2>
+<p><strong>Description:</strong> {{ item['Clothes Description'] }}</p>
+<p><strong>Category:</strong> {{ item['Department Name'] }}</p>
+
+<p><a href="{{ url_for('new_review', item_id=item['Clothing ID']) }}">➕ Add a Review</a></p>
+<hr>
+<h3>Customer Reviews</h3>
+
+{% if reviews %}
+    <ul>
+        {% for review in reviews %}
+            <li>
+                <strong>Rating:</strong> {{ review.get('Rating') or review.get('rating') }}
+		<span class="stars">
+                    {% for i in range(1, 6) %}
+                        {% if review['Rating']|int >= i %}
+                            ★
+                        {% else %}
+                            ☆
+                        {% endif %}
+                    {% endfor %}
+                </span>
+                <br>
+
+                <strong>Title:</strong> {{ review['Title'] }}<br>
+                <strong>Review:</strong> {{ review['Review Text'] or review['review'] }}<br>
+                <p><strong>Recommended:</strong>
+{% if review['Recommended IND'] == 1 %}
+  <span class="badge-yes">Yes</span>
+{% else %}
+  <span class="badge-no">No</span>
+{% endif %}
+
+</p>
+
+                <hr>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No reviews yet.</p>
+{% endif %}
+
+{% endblock %}
